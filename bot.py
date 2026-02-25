@@ -193,11 +193,24 @@ async def get_pinterest_image_url(url: str):
     return None
 
 def download_media(url: str, filename: str):
-    ydl_opts = {'outtmpl': filename, 'format': 'best', 'quiet': True, 'no_warnings': True}
+    ydl_opts = {
+        'outtmpl': filename,
+        'format': 'best',
+        'quiet': True,
+        'no_warnings': True,
+        # Добавляем маскировку под обычный Chrome на Windows
+        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'referer': 'https://www.instagram.com/',
+        # Ограничение по времени, чтобы бот не завис намертво
+        'socket_timeout': 30,
+    }
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl: ydl.download([url])
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
         return True
-    except Exception: return False
+    except Exception as e:
+        print(f"Ошибка yt-dlp: {e}")
+        return False
 
 # --- ОСНОВНЫЕ ОБРАБОТЧИКИ ---
 @router.message(CommandStart())
